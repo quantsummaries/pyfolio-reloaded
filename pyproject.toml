@@ -181,3 +181,8 @@ deps =
 commands =
     pytest -n 2 --cov={toxinidir}/src --cov-report term  --cov-report=xml --cov-report=html:htmlcov {toxinidir}/tests
 """
+
+[dependency-groups]
+dev = [
+    "setuptools-scm>=10.3.4",
+]
