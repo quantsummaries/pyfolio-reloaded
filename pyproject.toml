@@ -2,7 +2,7 @@
 name = "pyfolio-reloaded"
 description = "Performance and risk analysis of financial portfolios with Python"
 
-requires-python = '>=3.9'
+requires-python = '>=3.10'
 dynamic = ["version"]
 readme = "README.md"
 authors = [
@@ -43,6 +43,7 @@ dependencies = [
     "scikit-learn >=0.16.1",
     "seaborn >=0.7.1",
     "empyrical-reloaded >=0.5.9",
+    "zipline-reloaded",
 ]
 
 [project.urls]
@@ -181,6 +182,9 @@ deps =
 commands =
     pytest -n 2 --cov={toxinidir}/src --cov-report term  --cov-report=xml --cov-report=html:htmlcov {toxinidir}/tests
 """
+
+[tool.uv.sources]
+zipline-reloaded = { path = "../zipline-reloaded", editable = true }
 
 [dependency-groups]
 dev = [

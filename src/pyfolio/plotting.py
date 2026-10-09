@@ -667,6 +667,7 @@ def show_perf_stats(
     for column in perf_stats.columns:
         for stat, value in perf_stats[column].items():
             if stat in STAT_FUNCS_PCT:
+                perf_stats = perf_stats.astype(object)
                 perf_stats.loc[stat, column] = str(np.round(value * 100, 3)) + "%"
     if header_rows is None:
         header_rows = date_rows
@@ -1404,6 +1405,7 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
             linestyle="",
         )
         ax.legend(handles=[red_dots], frameon=True, framealpha=0.5)
+    ax.set_xticks(range(3))
     ax.set_xticklabels(["Daily", "Weekly", "Monthly"])
     ax.set_title("Return quantiles")
 
