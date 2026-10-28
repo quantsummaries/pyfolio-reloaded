@@ -271,7 +271,7 @@ def extract_round_trips(transactions, portfolio_value=None):
 
         tmp = (
             roundtrips.set_index("date")
-            .join(pv.set_index("date"), lsuffix="_")
+            .join(pv.set_index("date"))
             .reset_index()
         )
 

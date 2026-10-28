@@ -4,6 +4,7 @@ import unittest
 import warnings
 from pathlib import Path
 import empyrical as ep
+from packaging.version import Version
 from pyfolio.perf_attrib import (
     perf_attrib,
     create_perf_attrib_stats,
@@ -14,9 +15,13 @@ TEST_DATA = Path(__file__).parent / "test_data"
 
 
 def _empyrical_compat_perf_attrib_result(index, columns, data):
-    major, minor, micro = ep.__version__.split(".")
-    major, minor, micro = int(major), int(minor), int(micro)
-    if major == 0 and (minor < 5 or (minor == 5 and micro < 2)):
+    version = Version(ep.__version__)
+    major, minor, micro = (
+        version.release[0],
+        version.release[1],
+        version.release[2] if len(version.release) > 2 else 0,
+    )
+    if (major, minor, micro) < (0, 5, 2) and "dev" not in ep.__version__:
         # Newer columns were added in empyrical v0.5.2. These exist in older
         # and newer empyrical:
         columns = [

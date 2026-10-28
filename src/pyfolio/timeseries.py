@@ -967,7 +967,7 @@ def get_top_drawdowns(returns, top=10):
         peak, valley, recovery = get_max_drawdown_underwater(underwater)
         # Slice out draw-down period
         if not pd.isnull(recovery):
-            underwater.drop(underwater[peak:recovery].index[1:-1], inplace=True)
+            underwater = underwater.drop(underwater[peak:recovery].index[1:-1])
         else:
             # drawdown has not ended yet
             underwater = underwater.loc[:peak]

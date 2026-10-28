@@ -45,7 +45,7 @@ dependencies = [
     "scipy >=0.14.0",
     "scikit-learn >=0.16.1",
     "seaborn >=0.7.1",
-    "empyrical-reloaded >=0.5.11",
+    "empyrical-reloaded>=0.5.11",
 ]
 
 [project.urls]
@@ -112,6 +112,19 @@ pythonpath = ['src']
 minversion = "6.0"
 testpaths = 'tests'
 addopts = '-v'
+filterwarnings = [
+    "ignore:Module \"zipline.assets\" not found; multipliers will not be applied to position notionals\\.:UserWarning",
+    "ignore:Could not infer format, so each element will be parsed individually, falling back to `dateutil`\\..*:UserWarning",
+    "ignore:Risk functions in pyfolio.timeseries are deprecated and will be removed in a future release\\..*:DeprecationWarning",
+    "ignore:Sorting by default when concatenating all DatetimeIndex is deprecated\\..*:Warning",
+    "ignore:The 'generic' unit for NumPy timedelta is deprecated\\..*:DeprecationWarning",
+    "ignore:no explicit representation of timezones available for np\\.datetime64:UserWarning",
+    "ignore::matplotlib.MatplotlibDeprecationWarning:seaborn\\.categorical",
+    "ignore::PendingDeprecationWarning:seaborn\\.matrix",
+    "ignore:Passing `palette` without assigning `hue` is deprecated\\..*:FutureWarning",
+    "ignore:invalid value encountered in scalar power:RuntimeWarning",
+    "ignore::pyparsing.exceptions.PyparsingDeprecationWarning",
+]
 
 
 [tool.cibuildwheel]
@@ -205,6 +218,7 @@ commands =
 
 [tool.uv.sources]
 zipline-reloaded = { path = "../zipline-reloaded", editable = true }
+empyrical-reloaded = { path = "../empyrical-reloaded", editable = true }
 
 [dependency-groups]
 dev = [

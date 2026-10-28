@@ -79,7 +79,7 @@ def make_transaction_frame(transactions):
     )
     df["txn_dollars"] = -df["amount"] * df["price"]
 
-    df.index = pd.DatetimeIndex(list(map(pd.Timestamp, df.dt.values)))
+    df.index = pd.DatetimeIndex(pd.to_datetime(df["dt"].to_numpy()))
     return df
 
 

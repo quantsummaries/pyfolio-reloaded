@@ -166,8 +166,8 @@ def plot_monthly_returns_heatmap(returns, ax=None, **kwargs):
     monthly_ret_table = ep.aggregate_returns(returns, "monthly")
     monthly_ret_table = monthly_ret_table.unstack().round(3)
 
-    monthly_ret_table.rename(
-        columns={i: m for i, m in enumerate(calendar.month_abbr)}, inplace=True
+    monthly_ret_table = monthly_ret_table.rename(
+        columns={i: m for i, m in enumerate(calendar.month_abbr)}
     )
 
     sns.heatmap(
@@ -1393,6 +1393,7 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
     if live_start_date is not None:
         live_start_date = utils._comparable_live_start(live_start_date, returns.index)
 
+    live_color = kwargs.pop("color", "red")
     is_returns = (
         returns
         if live_start_date is None
@@ -1400,9 +1401,24 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
     )
     is_weekly = ep.aggregate_returns(is_returns, "weekly")
     is_monthly = ep.aggregate_returns(is_returns, "monthly")
+    quantile_data = pd.DataFrame(
+        {
+            "Period": np.repeat(
+                ["Daily", "Weekly", "Monthly"],
+                [len(is_returns), len(is_weekly), len(is_monthly)],
+            ),
+            "Return": np.concatenate(
+                [is_returns.values, is_weekly.values, is_monthly.values]
+            ),
+        }
+    )
     sns.boxplot(
-        data=[is_returns.values, is_weekly.values, is_monthly.values],
+        data=quantile_data,
+        x="Period",
+        y="Return",
+        hue="Period",
         palette=["#4c72B0", "#55A868", "#CCB974"],
+        legend=False,
         ax=ax,
         **kwargs,
     )
@@ -1412,7 +1428,6 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
         oos_weekly = ep.aggregate_returns(oos_returns, "weekly")
         oos_monthly = ep.aggregate_returns(oos_returns, "monthly")
 
-        live_color = kwargs.pop("color", "red")
         sns.swarmplot(
             data=[oos_returns.values, oos_weekly.values, oos_monthly.values],
             ax=ax,
@@ -1952,7 +1967,6 @@ def show_profit_attribution(round_trips):
     pnl_attribution.index = pnl_attribution.index.map(utils.format_asset)
     utils.print_table(
         pnl_attribution.sort_values(
-            inplace=False,
             ascending=False,
         ),
         name="Profitability (PnL / PnL total) per name",
