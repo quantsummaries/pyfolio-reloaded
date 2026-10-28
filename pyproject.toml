@@ -80,6 +80,7 @@ dev = [
     "flake8 >=3.9.1",
     "black",
     "pre-commit >=2.12.1",
+    "zipline-reloaded",
 ]
 docs = [
     'Cython',
@@ -111,19 +112,21 @@ local_scheme = 'dirty-tag'
 pythonpath = ['src']
 minversion = "6.0"
 testpaths = 'tests'
-addopts = '-v'
+addopts = '-v -p no:warnings'
 filterwarnings = [
     "ignore:Module \"zipline.assets\" not found; multipliers will not be applied to position notionals\\.:UserWarning",
     "ignore:Could not infer format, so each element will be parsed individually, falling back to `dateutil`\\..*:UserWarning",
     "ignore:Risk functions in pyfolio.timeseries are deprecated and will be removed in a future release\\..*:DeprecationWarning",
     "ignore:Sorting by default when concatenating all DatetimeIndex is deprecated\\..*:Warning",
-    "ignore:The 'generic' unit for NumPy timedelta is deprecated\\..*:DeprecationWarning",
+    "ignore:The 'generic' unit for NumPy timedelta is deprecated.*:DeprecationWarning",
     "ignore:no explicit representation of timezones available for np\\.datetime64:UserWarning",
     "ignore::matplotlib.MatplotlibDeprecationWarning:seaborn\\.categorical",
     "ignore::PendingDeprecationWarning:seaborn\\.matrix",
+    "ignore::PendingDeprecationWarning:seaborn\\.categorical",
     "ignore:Passing `palette` without assigning `hue` is deprecated\\..*:FutureWarning",
     "ignore:invalid value encountered in scalar power:RuntimeWarning",
-    "ignore::pyparsing.exceptions.PyparsingDeprecationWarning",
+    "ignore::Warning:matplotlib\\._fontconfig_pattern",
+    "ignore::pyparsing.PyparsingDeprecationWarning",
 ]
 
 
@@ -217,8 +220,8 @@ commands =
 """
 
 [tool.uv.sources]
-zipline-reloaded = { path = "../zipline-reloaded", editable = true }
 empyrical-reloaded = { path = "../empyrical-reloaded", editable = true }
+zipline-reloaded = { path = "../zipline-reloaded", editable = true }
 
 [dependency-groups]
 dev = [
