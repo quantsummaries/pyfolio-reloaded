@@ -1,14 +1,9 @@
 # Pyfolio Documentation and Code Review Guide
 
-## Warmup
-
-- [x] Read the project overview and installation instructions in [`README.md`](README.md).
-- [x] Review the generated API reference in [`docs/source/api-reference.rst`](docs/source/api-reference.rst).
-- [ ] Run an example notebook, such as [`docs/source/notebooks/round_trip_tear_sheet_example.ipynb`](docs/source/notebooks/round_trip_tear_sheet_example.ipynb).
-- [ ] Review the package source under [`src/pyfolio/`](src/pyfolio/).
+> **Version**: written against branch `yzeng` at HEAD `5afb198` (2026-10-08).
 
 ## Table of Contents
-
+- [Warmup](#warmup)
 - [Overview](#overview)
 - [Package dependencies for code review](#package-dependencies-for-code-review)
 - [Module guide](#module-guide)
@@ -23,8 +18,16 @@
 - [Primary workflow](#primary-workflow)
 - [Dependency observations](#dependency-observations)
 
-## Overview
 
+## Warmup
+- [x] Read the project overview and installation instructions in [`README.md`](README.md).
+- [x] Review the generated API reference in [`docs/source/api-reference.rst`](docs/source/api-reference.rst).
+- [ ] Run an example notebook, such as [`docs/source/notebooks/round_trip_tear_sheet_example.ipynb`](docs/source/notebooks/round_trip_tear_sheet_example.ipynb).
+- [ ] Review the package source under [`src/pyfolio/`](src/pyfolio/).
+
+[⬆ 回到目录](#table-of-contents)
+
+## Overview
 Pyfolio analyzes the performance and risk of investment portfolios. Its main
 workflow accepts non-cumulative strategy returns and, optionally, positions,
 transactions, market data, benchmark returns, and factor data. Analysis modules
@@ -36,8 +39,9 @@ The tear-sheet entry points live in `pyfolio.tears`. The main entry point,
 analysis, then includes position, transaction, round-trip, capacity, and
 performance-attribution reports when their required inputs are supplied.
 
-## Package dependencies for code review
+[⬆ 回到目录](#table-of-contents)
 
+## Package dependencies for code review
 Review the modules in dependency order. Arrows identify direct imports of
 other `pyfolio` modules; third-party and standard-library imports are not
 shown here. Checkbox order is a suggested review sequence, not a record of
@@ -72,8 +76,9 @@ completed review.
 
 14. - [ ] `pyfolio.__init__` → package modules above; re-exports plotting and tear-sheet functions
 
-## Module guide
+[⬆ 回到目录](#table-of-contents)
 
+## Module guide
 ### `pyfolio.tears`
 
 Composes portfolio inputs and analysis functions into tear sheets. The
@@ -145,8 +150,9 @@ converts a Zipline backtest result into data accepted by pyfolio tear sheets.
   other source module currently imports it.
 - `_version` contains generated package version information.
 
-## Primary workflow
+[⬆ 回到目录](#table-of-contents)
 
+## Primary workflow
 1. Prepare daily, non-cumulative strategy returns as a `pandas.Series`.
 2. Optionally prepare positions, transactions, benchmark returns, market data,
    and factor data in the formats described in the tear-sheet docstrings.
@@ -156,8 +162,9 @@ converts a Zipline backtest result into data accepted by pyfolio tear sheets.
    `round_trips`, `capacity`, or `perf_attrib` helpers and pass results to
    plotting functions as needed.
 
-## Dependency observations
+[⬆ 回到目录](#table-of-contents)
 
+## Dependency observations
 - The internal dependency graph is layered: data and utility modules support
   analytics, which support plotting and tear-sheet composition. No direct
   cyclic imports between `pyfolio` modules were identified from the source
@@ -173,3 +180,5 @@ converts a Zipline backtest result into data accepted by pyfolio tear sheets.
   `nbformat`; neither is declared as a direct runtime dependency in
   `pyproject.toml`. Whether they are available transitively depends on the
   installed environment.
+
+[⬆ 回到目录](#table-of-contents)

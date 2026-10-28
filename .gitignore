@@ -67,3 +67,5 @@ target/
 
 .idea
 src/pyfolio/_version.py
+
+sandbox
