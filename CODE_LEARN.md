@@ -1,6 +1,6 @@
 # Pyfolio Reloaded — Learning Roadmap
 
-> **Version**: written against branch `yzeng` at HEAD `5afb198` (2026-10-08).
+> **Version**: written against branch `yzeng` at HEAD `4fb77f2` (2026-10-28, pandas 3.x / Python 3.12 compatibility pass). Prior revision: HEAD `5afb198` (2026-10-08).
 
 Entry-points and recommended reading order for learning this codebase.
 All paths below are relative to the repo root `pyfolio-reloaded/`.
@@ -149,6 +149,10 @@ This module is misleadingly large; half of it is deprecated.
         `extract_interesting_date_ranges`, `value_at_risk`,
         `var_cov_var_normal`, `common_sense_ratio`.
 
+> Since `4fb77f2`, the deprecated `sortino_ratio` wrapper forwards
+> `period=period` to `empyrical.sortino_ratio`, and `rolling_regression`
+> skips windows where no row has observations for all factors.
+
 [⬆ 回到目录](#table-of-contents)
 
 ## 6. Analysis modules (numeric work)
@@ -219,6 +223,11 @@ Read in this order:
       capacity, position analysis, and perf_attrib.
 - [ ] `txn.get_turnover` is shared between `timeseries.perf_stats`,
       `perf_attrib._align_and_warn`, and two plotting functions.
+- [ ] Since `4fb77f2`, `show_perf_stats` requires a `DatetimeIndex` for
+      `returns` (raises `TypeError` otherwise), and the live-start cut-off in
+      `plot_returns` / `plot_rolling_returns` / `plot_return_quantiles` /
+      `show_perf_stats` routes through `utils._comparable_live_start` so the
+      comparison honors the index's timezone.
 
 [⬆ 回到目录](#table-of-contents)
 

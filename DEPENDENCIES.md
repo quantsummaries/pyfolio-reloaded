@@ -1,6 +1,6 @@
 # Pyfolio Function Dependencies
 
-> **Version**: written against branch `yzeng` at HEAD `5afb198` (2026-10-08).
+> **Version**: written against branch `yzeng` at HEAD `4fb77f2` (2026-10-28, pandas 3.x / Python 3.12 compatibility pass). Prior revision: HEAD `5afb198` (2026-10-08).
 
 This document maps the in-package function calls in `src/pyfolio`. It is
 intended as a navigation aid for reviewing implementation changes: a change to
@@ -38,7 +38,9 @@ These functions do not call another Pyfolio function directly.
    `configure_legend`, `detect_intraday`, `estimate_intraday`,
    `format_asset`, `get_symbol_rets`, `one_dec_places`, `percentage`,
    `print_table`, `register_return_func`, `sample_colormap`,
-   `standardize_data`, `to_series`, `to_utc`, `two_dec_places`, `vectorize`.
+   `standardize_data`, `to_series`, `to_utc`, `two_dec_places`, `vectorize`,
+   `_comparable_live_start` (new in `4fb77f2`; normalizes a live-start
+   instant to the target return index's timezone).
 2. `pyfolio.txn`: `adjust_returns_for_slippage`, `get_turnover`,
    `get_txn_vol`, `make_transaction_frame`, `map_transaction`.
 3. `pyfolio.pos`: `extract_pos`, `get_long_short_pos`, `get_percent_alloc`,
@@ -108,6 +110,10 @@ These functions do not call another Pyfolio function directly.
 28. `plotting.show_profit_attribution` → `utils.print_table`.
 29. `plotting.show_worst_drawdown_periods` →
     `timeseries.gen_drawdown_table`, `utils.print_table`.
+30. `plotting.show_perf_stats`, `plotting.plot_returns`,
+    `plotting.plot_rolling_returns`, `plotting.plot_return_quantiles` →
+    `utils._comparable_live_start` (new in `4fb77f2`; replaces the previous
+    direct `empyrical.utils.get_utc_timestamp` call).
 
 ### Level 1 (continued) — deprecated metrics wrappers
 
@@ -253,5 +259,11 @@ pyfolio.tears
 - **`tears.py` is purely an orchestration layer.** It performs no numeric
   computation itself; every tear sheet is a composition of `plotting.*`,
   `timeseries.*`, and the `pos/txn/round_trips/capacity` analysis modules.
+- Since `4fb77f2` (pandas 3.x / Python 3.12 pass): the live-start handling in
+  `plotting` now routes through the new `utils._comparable_live_start`
+  (instead of a direct `empyrical` call), and the time-series resampling in
+  `plot_holdings` / `plot_turnover` / `plot_monthly_returns_timeseries` uses
+  `pd.offsets.MonthEnd()` instead of string aliases. These are internal
+  plumbing changes; they do not alter the layered dependency structure.
 
 [⬆ 回到目录](#table-of-contents)
