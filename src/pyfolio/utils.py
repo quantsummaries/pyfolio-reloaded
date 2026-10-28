@@ -148,17 +148,19 @@ def extract_rets_pos_txn_from_zipline(backtest):
     -------
     returns : pd.Series
         Daily returns of strategy.
-         - See full explanation in tears.create_full_tear_sheet.
+        See full explanation in tears.create_full_tear_sheet.
     positions : pd.DataFrame
         Daily net position values.
-         - See full explanation in tears.create_full_tear_sheet.
+        See full explanation in tears.create_full_tear_sheet.
     transactions : pd.DataFrame
         Prices and amounts of executed trades. One row per trade.
-         - See full explanation in tears.create_full_tear_sheet.
+        See full explanation in tears.create_full_tear_sheet.
 
 
-    Example (on the Quantopian research platform)
-    ---------------------------------------------
+    Examples
+    --------
+    On the Quantopian research platform:
+
     >>> backtest = my_algo.run()
     >>> returns, positions, transactions =
     >>>     pyfolio.utils.extract_rets_pos_txn_from_zipline(backtest)
@@ -178,7 +180,11 @@ def extract_rets_pos_txn_from_zipline(backtest):
     if not raw_positions:
         raise ValueError("The backtest does not have any positions.")
     positions = pd.concat(raw_positions)
-    positions = pos.extract_pos(positions, backtest.ending_cash)
+    if positions.empty:
+        positions = backtest.ending_cash.to_frame("cash")
+        positions.columns.name = "sid"
+    else:
+        positions = pos.extract_pos(positions, backtest.ending_cash)
     transactions = txn.make_transaction_frame(backtest.transactions)
     if transactions.index.tzinfo is None:
         transactions.index = transactions.index.tz_localize("utc")
@@ -265,10 +271,10 @@ def detect_intraday(positions, transactions, threshold=0.25):
     ----------
     positions : pd.DataFrame
         Daily net position values.
-         - See full explanation in create_full_tear_sheet.
+        See full explanation in create_full_tear_sheet.
     transactions : pd.DataFrame
         Prices and amounts of executed trades. One row per trade.
-         - See full explanation in create_full_tear_sheet.
+        See full explanation in create_full_tear_sheet.
 
     Returns
     -------
@@ -294,13 +300,13 @@ def check_intraday(estimate, returns, positions, transactions):
         See description in tears.create_full_tear_sheet.
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
-         - See full explanation in create_full_tear_sheet.
+        See full explanation in create_full_tear_sheet.
     positions : pd.DataFrame
         Daily net position values.
-         - See full explanation in create_full_tear_sheet.
+        See full explanation in create_full_tear_sheet.
     transactions : pd.DataFrame
         Prices and amounts of executed trades. One row per trade.
-         - See full explanation in create_full_tear_sheet.
+        See full explanation in create_full_tear_sheet.
 
     Returns
     -------
@@ -344,13 +350,13 @@ def estimate_intraday(returns, positions, transactions, EOD_hour=23):
     ----------
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
-         - See full explanation in create_full_tear_sheet.
+        See full explanation in create_full_tear_sheet.
     positions : pd.DataFrame
         Daily net position values.
-         - See full explanation in create_full_tear_sheet.
+        See full explanation in create_full_tear_sheet.
     transactions : pd.DataFrame
         Prices and amounts of executed trades. One row per trade.
-         - See full explanation in create_full_tear_sheet.
+        See full explanation in create_full_tear_sheet.
 
     Returns
     -------
@@ -373,9 +379,9 @@ def estimate_intraday(returns, positions, transactions, EOD_hour=23):
 
     # Calculate exposure, then take peak of exposure every day
     txn_val["exposure"] = txn_val.abs().sum(axis=1)
-    condition = txn_val["exposure"] == txn_val.groupby(pd.Grouper(freq="24H"))[
-        "exposure"
-    ].transform(max)
+    condition = txn_val["exposure"] == txn_val.groupby(
+        pd.Grouper(freq=pd.offsets.Hour(24))
+    )["exposure"].transform("max")
     txn_val = txn_val[condition].drop("exposure", axis=1)
 
     # Compute cash delta
@@ -383,8 +389,8 @@ def estimate_intraday(returns, positions, transactions, EOD_hour=23):
 
     # Shift EOD positions to positions at start of next trading day
     positions_shifted = positions.copy().shift(1).fillna(0)
-    starting_capital = positions.iloc[0].sum() / (1 + returns[0])
-    positions_shifted.cash[0] = starting_capital
+    starting_capital = positions.iloc[0].sum() / (1 + returns.iloc[0])
+    positions_shifted.loc[positions_shifted.index[0], "cash"] = starting_capital
 
     # Format and add start positions to intraday position changes
     txn_val.index = txn_val.index.normalize()
@@ -404,7 +410,7 @@ def clip_returns_to_benchmark(rets, benchmark_rets):
     ----------
     rets : pd.Series
         Daily returns of the strategy, noncumulative.
-         - See pf.tears.create_full_tear_sheet for more details
+        See pf.tears.create_full_tear_sheet for more details
 
     benchmark_rets : pd.Series
         Daily returns of the benchmark, noncumulative.
@@ -424,6 +430,14 @@ def clip_returns_to_benchmark(rets, benchmark_rets):
         clipped_rets = rets
 
     return clipped_rets
+
+
+def _comparable_live_start(dt, index):
+    """Compare the UTC live-start instant with an aware or naive return index."""
+    timestamp = empyrical.utils.get_utc_timestamp(dt)
+    if index.tz is None:
+        return timestamp.tz_localize(None)
+    return timestamp.tz_convert(index.tz)
 
 
 def to_utc(df):
@@ -519,9 +533,9 @@ def configure_legend(
 
     # make legend order match graph lines
     handles, labels = ax.get_legend_handles_labels()
-    handles_and_labels_sorted = sorted(
-        zip(handles, labels), key=lambda x: x[0].get_ydata()[-1], reverse=True
-    )
+    handles_and_labels_sorted = list(zip(handles, labels))
+    if all(hasattr(handle, "get_ydata") for handle, _ in handles_and_labels_sorted):
+        handles_and_labels_sorted.sort(key=lambda x: x[0].get_ydata()[-1], reverse=True)
 
     handles_sorted = [h[0] for h in handles_and_labels_sorted]
     labels_sorted = [h[1] for h in handles_and_labels_sorted]
@@ -530,15 +544,16 @@ def configure_legend(
         for handle, color in zip(handles_sorted, cycle(COLORS)):
             handle.set_color(color)
 
-    ax.legend(
-        handles=handles_sorted,
-        labels=labels_sorted,
-        frameon=True,
-        framealpha=0.5,
-        loc="upper left",
-        bbox_to_anchor=(1.05, 1),
-        fontsize="small",
-    )
+    if handles_sorted:
+        ax.legend(
+            handles=handles_sorted,
+            labels=labels_sorted,
+            frameon=True,
+            framealpha=0.5,
+            loc="upper left",
+            bbox_to_anchor=(1.05, 1),
+            fontsize="small",
+        )
 
     # manually rotate xticklabels instead of using matplotlib's autofmt_xdate
     # because it disables xticklabels for all but the last plot

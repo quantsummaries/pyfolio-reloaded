@@ -6,14 +6,22 @@
 
 ![PyPI](https://img.shields.io/pypi/v/pyfolio-reloaded)
 [![Tests](https://github.com/stefan-jansen/pyfolio-reloaded/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/stefan-jansen/pyfolio-reloaded/actions/workflows/unit_tests.yml)
-[![conda](https://github.com/stefan-jansen/pyfolio-reloaded/actions/workflows/conda_package.yml/badge.svg)](https://github.com/stefan-jansen/pyfolio-reloaded/actions/workflows/conda_package.yml)
 [![PyPI](https://github.com/stefan-jansen/pyfolio-reloaded/actions/workflows/build_wheels.yml/badge.svg)](https://github.com/stefan-jansen/pyfolio-reloaded/actions/workflows/build_wheels.yml)
 [![Coverage Status](https://coveralls.io/repos/github/stefan-jansen/pyfolio-reloaded/badge.svg?branch=main)](https://coveralls.io/github/stefan-jansen/pyfolio-reloaded?branch=main)
 ![GitHub issues](https://img.shields.io/github/issues/stefan-jansen/pyfolio-reloaded)
-![Discourse users](https://img.shields.io/discourse/users?server=https%3A%2F%2Fexchange.ml4trading.io%2F)
 ![Twitter Follow](https://img.shields.io/twitter/follow/ml4trading?style=social)
 
 pyfolio is a Python library for performance and risk analysis of financial portfolios that works well with the [Zipline](https://zipline.ml4trading.io/) open source backtesting library.
+
+## Maintenance and new development
+
+We continue to maintain Pyfolio Reloaded for bug, security and compatibility fixes.
+Our new feature development focuses on the current [ML4T libraries](https://www.ml4trading.io/),
+including [ML4T Diagnostic](https://github.com/ml4t/diagnostic).
+For new projects, we recommend evaluating Diagnostic through its
+[migration guide](https://www.ml4trading.io/docs/diagnostic/user-guide/migration/#pyfolio-portfolio-and-performance-analysis),
+which includes a runnable portfolio example and explains differences between the workflows.
+See the [Diagnostic documentation](https://www.ml4trading.io/docs/diagnostic/) for its supported APIs.
 
 ## Trading Strategy Analysis with pyfolio
 
@@ -44,27 +52,52 @@ In addition, it visualizes how several risk and return metrics behave over time:
 
 ## Installation
 
-To install pyfolio, run:
+Pyfolio 0.10.0 and this source version support Python 3.11-3.15. Python 3.9 and 3.10
+are retired. Existing release artifacts retain their
+original Python requirements. See the [Python support schedule](https://devguide.python.org/versions/).
+
+This source version supports pandas 3.0 and 3.1 on Python 3.11-3.15, alongside
+the existing pandas 1.5/2.x combinations where supported by the interpreter.
+Pandas 3.2 and later are not yet qualified.
+Published 0.10.0 permits pandas 3.0 only on Python 3.15.
+
+Pandas 3.1 requires NumPy 2.0.2 or newer on Python 3.11-3.13. The dependency
+resolver applies its requirements alongside the Python-specific floors below.
+
+When sharing an environment with Zipline, its dependency constraints also apply.
+Zipline Reloaded 3.2.0 requires pandas below 3.0; use a compatible pandas 2.x
+environment for that integration. Pyfolio itself does not require Zipline.
+
+Python 3.14 requires pandas 2.3.3 or newer and NumPy 2.3.3 or newer. Python 3.15 requires
+pandas 3.0.6 and NumPy 2.5.4 or newer; pandas 2.3.3 crashes during date-range
+construction in the stable CPython 3.15 Linux qualification. The dependency markers
+select the appropriate combination. Bottleneck currently builds from source on
+Python 3.15, so that installation needs a C compiler.
+
+To install a published Pyfolio release into a supported environment, run:
 
 ```bash
 pip install pyfolio-reloaded
 ```
-or
+
+The Conda channel contains historical releases:
 
 ```bash
 conda install -c ml4t pyfolio-reloaded
 ```
 
-#### Development
+The frozen Conda 0.9.4 recipe and existing channel artifacts are preserved.
+That recipe does not build this source version, and its publishing workflow is retired.
 
-For development, you may want to use a [virtual environment](https://docs.python-guide.org/en/latest/dev/virtualenvs/) to avoid dependency conflicts between pyfolio and other Python projects you have.
+### Development
 
-To get set up with a virtual env, run:
+Clone this repository, then create an isolated environment and install the declared extras:
+
 ```bash
-mkvirtualenv pyfolio
+uv venv --python 3.11
+uv pip install -e '.[test,docs,dev]'
+uv run pre-commit install
 ```
-
-Next, clone this git repository and run `python -m pip install .[all]` and edit the library files directly.
 
 ## Usage
 
@@ -92,6 +125,9 @@ You can also join our [community](https://exchange.ml4trading.io).
 Please [open an issue](https://github.com/stefan-jansen/pyfolio-reloaded/issues/new) for support.
 
 ## Contributing
+
+Read the [contribution guide](https://github.com/stefan-jansen/pyfolio-reloaded/blob/main/CONTRIBUTING.md)
+before submitting an issue or pull request. This library accepts bug, security and compatibility fixes.
 
 If you'd like to contribute, a great place to look is the [issues marked with help-wanted](https://github.com/stefan-jansen/pyfolio-reloaded/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22).
 

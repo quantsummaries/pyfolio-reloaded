@@ -73,10 +73,13 @@ def make_transaction_frame(transactions):
         for txn in txns:
             txn = map_transaction(txn)
             transaction_list.append(txn)
-    df = pd.DataFrame(sorted(transaction_list, key=lambda x: x["dt"]))
+    df = pd.DataFrame(
+        sorted(transaction_list, key=lambda x: x["dt"]),
+        columns=["sid", "symbol", "price", "order_id", "amount", "commission", "dt"],
+    )
     df["txn_dollars"] = -df["amount"] * df["price"]
 
-    df.index = list(map(pd.Timestamp, df.dt.values))
+    df.index = pd.DatetimeIndex(list(map(pd.Timestamp, df.dt.values)))
     return df
 
 
@@ -140,7 +143,7 @@ def adjust_returns_for_slippage(returns, positions, transactions, slippage_bps):
     traded_value = get_txn_vol(transactions).txn_volume
     slippage_dollars = traded_value * slippage
     adjusted_pnl = pnl.add(-slippage_dollars, fill_value=0)
-    adjusted_returns = returns * adjusted_pnl / pnl
+    adjusted_returns = adjusted_pnl / portfolio_value
 
     return adjusted_returns
 
@@ -178,7 +181,7 @@ def get_turnover(positions, transactions, denominator="AGB"):
     """
 
     txn_vol = get_txn_vol(transactions)
-    traded_value = txn_vol.txn_volume
+    traded_value = txn_vol.txn_volume.astype(float)
 
     if denominator == "AGB":
         # Actual gross book is the same thing as the algo's GMV
