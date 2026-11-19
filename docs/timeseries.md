@@ -451,9 +451,9 @@ events = pf.timeseries.extract_interesting_date_ranges(returns)
   by the first value, `cum_returns` compounds returns.
 - `rolling_beta` and `rolling_regression` loop over each window in Python and
   can be slow on long series.
-- `rolling_regression` uses `np.all(factor_returns_period.isnull().mean()) <
-  nan_threshold`. `np.all` returns a boolean, so the check compares a boolean
-  with the threshold and does not apply the NaN fraction as documented.
+- `rolling_regression` keeps a window only when **all** factor columns satisfy
+  `factor_returns_period.isnull().mean() <= nan_threshold`, then drops rows
+  with missing factor values before fitting the regression.
 - `perf_stats_bootstrap` ignores `positions`, `transactions`, and
   `turnover_denom`, so bootstrapped tables lack gross leverage and turnover.
 - `simulate_paths` accepts `starting_value` but does not use it;

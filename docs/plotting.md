@@ -445,8 +445,7 @@ with pf.plotting.plotting_context(), pf.plotting.axes_style():
 - `show_perf_stats` splits transactions at `live_start_date` with `<` for
   in-sample and `>` for out-of-sample, so a transaction exactly at the split
   timestamp falls in neither period, while returns and positions use `>=`.
-- `plot_holdings` and `plot_turnover` resample monthly with `"1M"` / `"M"`
-  aliases, and `plot_monthly_returns_timeseries` uses `"M"`; newer pandas
-  versions deprecate these aliases in favor of `"ME"`.
+- `plot_holdings`, `plot_turnover`, and `plot_monthly_returns_timeseries`
+  resample with `pd.offsets.MonthEnd()` month-end bins.
 - `show_and_plot_top_positions` is documented to return `ax` conditionally and
   returns `None` when it only prints.

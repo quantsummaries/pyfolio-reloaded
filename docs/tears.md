@@ -300,8 +300,9 @@ create_capacity_tear_sheet(
 Reports portfolio size constraints set by the least liquid tickers.
 
 - Prints tickers whose days to liquidate exceed a limit (assuming a $1M
-  capital base and trailing 5-day mean volume), for the whole backtest and for
-  the last `last_n_days`.
+  capital base and trailing 5-day mean volume): `days_to_liquidate_limit` is
+  applied for the whole-backtest table, and the last-`last_n_days` table is
+  currently filtered with a fixed `> 1` day threshold.
 - Prints tickers whose daily transactions consume more than
   `trade_daily_vol_limit` of the daily bar, for the whole backtest and the last
   `last_n_days`.
