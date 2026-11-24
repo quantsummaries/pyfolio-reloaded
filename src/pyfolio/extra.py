@@ -146,6 +146,7 @@ def plot_rolling_returns_df(
                 )
 
     ax.axhline(1.0, linestyle="--", color="black", lw=1)
+    ax.grid(True)
     if legend_loc is not None:
         ax.legend(loc=legend_loc, frameon=True, framealpha=0.5)
     if output_dir is not None:
