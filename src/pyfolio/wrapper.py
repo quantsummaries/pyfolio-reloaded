@@ -9,14 +9,14 @@ from . import plotting, tears, timeseries
 def return_stats_wrapper(port_rets: pd.Series,
                          freq: int,
                          output_dir: Path | str,
-                         benchmark_rets: pd.Series = None) -> pd.DataFrame:
+                         plot_benchmark_rets: pd.Series = None) -> pd.DataFrame:
     """Wrapper for pyfolio's return tear sheet and performance statistics.
 
     Args:
         port_rets (pd.Series): Portfolio returns.
         freq (int): Frequency of trades. If 1, daily returns are used; otherwise, returns are aggregated.
         output_dir (Path | str): Directory to save the output files.
-        benchmark_rets (pd.Series, optional): Benchmark returns. Defaults to None.
+        plot_benchmark_rets (pd.Series, optional): Benchmark returns for plotting. Defaults to None.
 
     Returns:
         pd.DataFrame: Performance statistics of the portfolio returns.
@@ -31,12 +31,12 @@ def return_stats_wrapper(port_rets: pd.Series,
 
     try:
         if freq == 1:
-            fig = tears.create_returns_tear_sheet(port_rets, benchmark_rets=benchmark_rets, return_fig=True)
+            fig = tears.create_returns_tear_sheet(port_rets, benchmark_rets=plot_benchmark_rets, return_fig=True)
             stats = timeseries.perf_stats(port_rets)
             statistics = stats.rename("value").rename_axis("metric").reset_index()
         else:
             fig, ax = plt.subplots(figsize=(12, 6))
-            plotting.plot_rolling_returns(port_rets, ax=ax, factor_returns=benchmark_rets, cone_std=None)
+            plotting.plot_rolling_returns(port_rets, ax=ax, factor_returns=plot_benchmark_rets, cone_std=None)
             ax.set_title(f"{port_rets.name} returns, one trade every {freq} sessions")
             statistics = pd.DataFrame({}, columns=["metric", "value"])
 
