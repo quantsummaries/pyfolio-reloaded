@@ -1,3 +1,4 @@
+import numbers
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -9,19 +10,23 @@ from . import plotting, tears, timeseries
 def return_stats_wrapper(port_rets: pd.Series,
                          freq: int,
                          output_dir: Path | str,
-                         plot_benchmark_rets: pd.Series = None) -> pd.DataFrame:
-    """Wrapper for pyfolio's return tear sheet and performance statistics.
+                         benchmark_rets: pd.Series = None) -> pd.DataFrame:
+    """Generate a returns tear-sheet image and write returns/statistics artifacts.
 
     Args:
         port_rets (pd.Series): Portfolio returns.
-        freq (int): Frequency of trades. If 1, daily returns are used; otherwise, returns are aggregated.
+        freq (int): Trade frequency in sessions. If 1, a full returns tear sheet and
+            performance statistics are generated. If greater than 1, a rolling-returns
+            plot is generated and no performance statistics are computed.
         output_dir (Path | str): Directory to save the output files.
-        plot_benchmark_rets (pd.Series, optional): Benchmark returns for plotting. Defaults to None.
+        benchmark_rets (pd.Series, optional): Benchmark returns for plotting. Defaults to None.
 
     Returns:
-        pd.DataFrame: Performance statistics of the portfolio returns.
+        pd.DataFrame: Portfolio performance statistics with columns ``metric`` and
+            ``value`` when ``freq == 1``; otherwise an empty DataFrame with the same
+            columns.
     """
-    if freq < 1:
+    if freq < 1 or not isinstance(freq, numbers.Integral):
         raise ValueError("Frequency must be a positive integer.")
     if port_rets.name is None:
         raise ValueError("Portfolio returns series must have a name.")
@@ -31,12 +36,12 @@ def return_stats_wrapper(port_rets: pd.Series,
 
     try:
         if freq == 1:
-            fig = tears.create_returns_tear_sheet(port_rets, benchmark_rets=plot_benchmark_rets, return_fig=True)
-            stats = timeseries.perf_stats(port_rets)
+            fig = tears.create_returns_tear_sheet(port_rets, benchmark_rets=benchmark_rets, return_fig=True)
+            stats = timeseries.perf_stats(port_rets, factor_returns=benchmark_rets)
             statistics = stats.rename("value").rename_axis("metric").reset_index()
         else:
             fig, ax = plt.subplots(figsize=(12, 6))
-            plotting.plot_rolling_returns(port_rets, ax=ax, factor_returns=plot_benchmark_rets, cone_std=None)
+            plotting.plot_rolling_returns(port_rets, ax=ax, factor_returns=benchmark_rets, cone_std=None)
             ax.set_title(f"{port_rets.name} returns, one trade every {freq} sessions")
             statistics = pd.DataFrame({}, columns=["metric", "value"])
 
@@ -51,7 +56,7 @@ def return_stats_wrapper(port_rets: pd.Series,
             partial.unlink(missing_ok=True)
 
         port_rets.rename_axis("date").to_frame(name=port_rets.name).reset_index().to_parquet(
-            output_dir / f"factor_returns_{port_rets.name}.parquet",
+            output_dir / f"returns_{port_rets.name}.parquet",
         )
 
         if freq == 1:
